@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GSAP Animator - Dynamic Text Effects</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif; margin: 0; color: #fff; display: flex;
+            justify-content: center; align-items: center; min-height: 100vh; overflow: hidden;
+        }
+        body.bg-animated-gradient {
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%; animation: gradientBGShift 15s ease infinite;
+        }
+        @keyframes gradientBGShift { 0% {background-position: 0% 50%;} 50% {background-position: 100% 50%;} 100% {background-position: 0% 50%;} }
+
+        .slide-container {
+            width: 78.08%; 
+            height: 68.9vh;
+            max-width: 1000px; 
+            overflow: hidden;
+            background-color: rgba(0, 0, 0, 0.95);
+            border-radius: 20px;
+            padding: 30px 40px; box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
+            position: relative; display: flex; flex-direction: column;
+        }
+        .slide {
+            position: absolute; top: 30px; left: 40px; right: 40px; bottom: 30px; 
+            opacity: 0; visibility: hidden; display: flex; flex-direction: column;
+        }
+        .slide.active { opacity: 1; visibility: visible; }
+
+        .slide h1, .slide h2 { font-size: 2.1em; margin-bottom: 30px; font-weight: bold; color: #f0f0f0; line-height: 1.3; text-align: center; }
+        .slide h1 span, .slide h2 span { display: inline-block; position: relative; }
+        .slide ul { list-style: none; padding-left: 0; margin-top: 10px; }
+        .slide li { font-size: 1.1em; margin-bottom: 15px; line-height: 1.65; color: #d0d0d0; opacity: 1; }
+        .slide li span, .slide p span { display: inline-block; opacity: 0; }
+        .slide li strong { color: #fff; font-weight: bold; }
+        .slide li em.important { color: #FFD700; font-style: normal; font-weight: bold; }
+
+
+        .slide .slide-content-wrapper {
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            flex-grow: 1; width: 100%; overflow: hidden;
+            position: relative;
+        }
+        .slide .slide-content-wrapper h1 {
+            width: 100%; text-align: center;
+        }
+        .slide .slide-content-wrapper ul { width: auto; max-width: 90%; box-sizing: border-box; }
+        
+        #moduleIntroText {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.5em;
+            color: #f0f0f0;
+            text-align: center;
+            z-index: 500; 
+            opacity: 0; 
+            text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+            width: 80%;
+        }
+        #moduleIntroText .module-title-part1 {
+            font-weight: bold;
+            display: inline;
+        }
+        #moduleIntroText .module-title-part2 {
+            display: inline;
+        }
+        #moduleIntroText .module-title-part2 strong em {
+            font-weight: bold;
+            font-style: italic;
+        }
+        #moduleIntroText .module-title-part1 span,
+        #moduleIntroText .module-title-part2 span {
+             display: inline-block;
+        }
+
+        .progress-bar-container {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 80px); 
+            height: 10px;
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 5px;
+            overflow: hidden;
+            z-index: 200; 
+            opacity: 0; 
+        }
+
+        .progress-bar-fill {
+            width: 0%;
+            height: 100%;
+            border-radius: 5px;
+            background: linear-gradient(-45deg, #84fab0, #8fd3f4, #fbc2eb, #f6d365); 
+            background-size: 400% 400%;
+            animation: gradientBGShift 15s ease infinite;
+        }
+
+        .animated-circle {
+            position: absolute;
+            width: 120px; 
+            height: 120px; 
+            top: 58%; 
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: 210;
+            background: linear-gradient(135deg, #FFFFFF 0%, #E0F2F7 25%, #A7D9F2 50%, #4A90E2 75%, #23A6D5 100%);
+            background-size: 300% 300%;
+            animation: circleGradientShift 15s ease infinite;
+            opacity: 0; 
+            will-change: background-position, opacity, transform, width, height, x, y;
+        }
+
+        @keyframes circleGradientShift {
+            0% { background-position: 0% 0%; }
+            25% { background-position: 100% 0%; }
+            50% { background-position: 100% 100%; }
+            75% { background-position: 0% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+
+    </style>
+</head>
+<body class="bg-animated-gradient">
+
+    <div class="slide-container">
+        <div id="moduleIntroText">
+            <span class="module-title-part1">Module 1: </span><span class="module-title-part2"><strong><em>The Hidden Cost of Multitasking in Remote Work</em></strong></span>
+        </div>
+        
+        <div class="slide" id="slide1"> 
+            <div class="slide-content-wrapper"> 
+                <h1>Multitasking Chaos in Remote Work</h1> 
+                <ul> 
+                    <li>🔄 Constantly juggling between <em class="important">Slack pings</em>, non-stop Zoom calls, and an ocean of browser tabs.</li>
+                    <li>📊 The typical remote professional switches tasks more than <em class="important">300 times each day</em>, often unconsciously.</li>
+                    <li>📉 This illusion of multitasking is not true productivity; it's a <em class="important">drain on efficiency</em>.</li>
+                    <li>🧠 Every context-switch taxes your mental reserves, leading to significant <em class="important">cognitive energy drain</em>.</li>
+                </ul> 
+            </div> 
+        </div>
+        
+        <div class="animated-circle" id="animatedCircle"></div>
+
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill"></div>
+        </div>
+    </div>
+
+    <script>
+        gsap.registerPlugin();
+        gsap.defaults({ease: "power2.out", duration: 0.5});
+
+        const EMOJIS_IN_USE = ['🔄', '📊', '📉', '🧠']; 
+        const INTER_LIST_ITEM_DELAY = 0.8; 
+        const CHAR_TYPEWRITER_STAGGER = 0.03;
+        
+        let circlePulseTween, circleFloatTween;
+
+        function splitTextIntoSpans(el,by='words'){
+            let content = [];
+            if (el.id === 'moduleIntroText') {
+                const part1 = el.querySelector('.module-title-part1');
+                const part2Container = el.querySelector('.module-title-part2');
+                const part2 = part2Container ? part2Container.querySelector('strong em') : null;
+
+                if (part1) {
+                    const part1Text = part1.textContent;
+                    part1.innerHTML = '';
+                    part1Text.trim().split(/\s+/).forEach((word, i, arr) => {
+                        const span = document.createElement('span');
+                        span.textContent = word;
+                        part1.appendChild(span);
+                        if (i < arr.length - 1) part1.appendChild(document.createTextNode(' '));
+                        content.push(span);
+                    });
+                }
+                if (part2) {
+                    const part2Text = part2.textContent;
+                    part2.innerHTML = '';
+                    part2Text.trim().split(/\s+/).forEach((word, i, arr) => {
+                        const span = document.createElement('span');
+                        span.textContent = word;
+                        part2.appendChild(span);
+                        if (i < arr.length - 1) part2.appendChild(document.createTextNode(' '));
+                        content.push(span);
+                    });
+                }
+                return content;
+            }
+
+            const t=el.textContent;el.innerHTML='';
+            if(by==='words'){const w=t.trim().split(/\s+/);return w.map((d,i)=>{const s=document.createElement('span');s.textContent=d;el.appendChild(s);if(i<w.length-1)el.appendChild(document.createTextNode(' '));return s;});}
+            else{const c=t.split('');return c.map(d=>{const s=document.createElement('span');if(d===' ')s.innerHTML='&nbsp;';else s.textContent=d;el.appendChild(s);return s;});}
+        }
+
+        function prepareLiContentForAnimation(parentElement) {
+            const allCharSpans = [];
+            function processNode(node) {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    const fragment = document.createDocumentFragment();
+                    for (let char of node.nodeValue) {
+                        const span = document.createElement('span');
+                        if (char === ' ') span.innerHTML = '&nbsp;';
+                        else span.textContent = char;
+                        
+                        let current = node.parentNode;
+                        if (current.tagName === 'EM' && current.classList.contains('important')) {
+                            span.classList.add('important-text');
+                        }
+
+                        if (EMOJIS_IN_USE.includes(char.trim())) span.classList.add('emoji-char');
+                        fragment.appendChild(span);
+                        allCharSpans.push(span);
+                    }
+                    node.parentNode.replaceChild(fragment, node);
+                } else if (node.nodeType === Node.ELEMENT_NODE) {
+                    if (node.tagName === 'EM' && node.classList.contains('important')) {
+                         Array.from(node.childNodes).forEach(processNode);
+                    }
+                    else if (node.childNodes.length === 1 && node.childNodes[0].nodeType === Node.TEXT_NODE && EMOJIS_IN_USE.includes(node.childNodes[0].nodeValue.trim()) && node.tagName !== 'SPAN') {
+                        const char = node.childNodes[0].nodeValue.trim();
+                        const span = document.createElement('span');
+                        span.textContent = char;
+                        span.classList.add('emoji-char');
+                        allCharSpans.push(span);
+                        node.innerHTML = '';
+                        node.appendChild(span);
+                    } else if (node.tagName !== 'SPAN') { 
+                        Array.from(node.childNodes).forEach(processNode);
+                    } else { 
+                        allCharSpans.push(node);
+                    }
+                }
+            }
+            Array.from(parentElement.childNodes).forEach(processNode);
+            return allCharSpans;
+        }
+        
+        function animateSlideIn(el, fromLeft = true, options = {}) {
+            const {
+                startLiIndex = 0,
+                liCountToAnimate = Infinity,
+                animateTitleOverride = null, 
+                instantSetupLiEndIndex = -1 
+            } = options;
+
+            const tl = gsap.timeline({
+                onStart: () => el.classList.add('animating-in'),
+                onComplete: function() { 
+                    el.classList.remove('animating-in');
+                    const allLi = Array.from(el.querySelectorAll("ul li"));
+                    if (allLi.length > 0 && (startLiIndex + liCountToAnimate < allLi.length)) {
+                        el.dataset.partiallyAnimated = "true";
+                    } else {
+                        delete el.dataset.partiallyAnimated;
+                    }
+                }
+            });
+
+            const titleEl = el.querySelector("h1, h2");
+            const allLiElements = Array.from(el.querySelectorAll("ul li"));
+
+            gsap.set(el, { autoAlpha: 1 }); 
+            el.animationTweens = el.animationTweens || [];
+            const store = (tween) => el.animationTweens.push(tween);
+            let timelineInsertPos = "+=0.1";
+
+            const shouldAnimateTitle = animateTitleOverride === true || (animateTitleOverride === null && startLiIndex === 0 && titleEl && !el.dataset.titleAnimated);
+
+            allLiElements.forEach(li => { if(li.originalHTML && !li.querySelector('span')) li.innerHTML = li.originalHTML; });
+
+            if (titleEl) {
+                const titleSpans = titleEl.querySelectorAll('span').length > 0 ? gsap.utils.toArray(titleEl.querySelectorAll('span')) : splitTextIntoSpans(titleEl, 'words');
+                gsap.set(titleEl, { opacity: 1 }); 
+
+                if (shouldAnimateTitle) {
+                    gsap.set(titleSpans, { opacity: 0, x: fromLeft ? -25 : 25, rotationY: fromLeft ? 30 : -30 });
+                    store(tl.to(titleSpans, {
+                        opacity: 1, x: 0, rotationY: 0,
+                        stagger: 0.08, ease: "back.out(1.7)"
+                    }, timelineInsertPos));
+                    timelineInsertPos = ">"; 
+                    el.dataset.titleAnimated = "true"; 
+                } else {
+                    gsap.set(titleSpans, { opacity: 1, x: 0, rotationY: 0 });
+                }
+            }
+
+            if (instantSetupLiEndIndex >= 0) {
+                for (let i = 0; i <= instantSetupLiEndIndex && i < allLiElements.length; i++) {
+                    const li = allLiElements[i];
+                    gsap.set(li, { opacity: 1, visibility: 'visible' }); 
+                    const charSpans = li.querySelectorAll('span').length > 0 ? gsap.utils.toArray(li.querySelectorAll('span')) : prepareLiContentForAnimation(li);
+                    charSpans.forEach(s => {
+                         gsap.set(s, { opacity: 1, y: 0, rotationX: 0, scale: 1 });
+                    });
+                    const emojisInLi = li.querySelectorAll('.emoji-char');
+                    gsap.killTweensOf(emojisInLi); 
+                    gsap.set(emojisInLi, {y:0, scale:1, rotation:0, opacity: 1}); 
+                    emojisInLi.forEach(eChar => { 
+                         el.animationTweens.push(gsap.to(eChar, { y: gsap.utils.random(-2, 2, 1), scale: gsap.utils.random(1.05, 1.1), rotation: gsap.utils.random(-5, 5, 1), duration: gsap.utils.random(0.8, 1.5), repeat: -1, yoyo: true, ease: "sine.inOut" }));
+                    });
+                }
+            }
+
+            allLiElements.forEach((li, index) => {
+                if (index < startLiIndex || index >= startLiIndex + liCountToAnimate) { 
+                    if (index > instantSetupLiEndIndex) { 
+                        gsap.set(li, { opacity: 0, visibility: 'hidden' });
+                    }
+                } else { 
+                     gsap.set(li, { opacity: 1, visibility: 'visible' }); 
+                }
+            });
+
+            const LIsForThisCall = allLiElements.slice(startLiIndex, startLiIndex + liCountToAnimate);
+
+            LIsForThisCall.forEach((li, idxInBatch) => {
+                gsap.set(li, { opacity: 1, visibility: 'visible' }); 
+                const charSpansAndLinks = prepareLiContentForAnimation(li); 
+                const emojis = charSpansAndLinks.filter(s => s.classList && s.classList.contains('emoji-char'));
+                const actualTextChars = charSpansAndLinks.filter(s => s.tagName === 'SPAN' && !s.classList.contains('emoji-char'));
+
+                let itemInsertTime = (idxInBatch === 0) ?
+                    ( (shouldAnimateTitle || startLiIndex > 0 || (titleEl && el.dataset.titleAnimated)) ? (timelineInsertPos === ">" ? ">" : `>${timelineInsertPos.replace('+=','') || 0}`) : `+=${timelineInsertPos.replace('+=','') || 0.2}` )
+                    : `>${INTER_LIST_ITEM_DELAY}`; 
+
+                if (emojis.length > 0 && charSpansAndLinks.indexOf(emojis[0]) === 0) { 
+                    gsap.set(emojis, { scale: 0.5, opacity: 0 });
+                    store(tl.to(emojis, {
+                        opacity: 1, scale: 1, duration: 0.4, stagger: 0.05, ease: "back.out(2)",
+                        onComplete: () => emojis.forEach(e => el.animationTweens.push(gsap.to(e, { y: gsap.utils.random(-2, 2, 1), scale: gsap.utils.random(1.05, 1.1), rotation: gsap.utils.random(-5, 5, 1), duration: gsap.utils.random(0.8, 1.5), repeat: -1, yoyo: true, ease: "sine.inOut" })))
+                    }, itemInsertTime));
+                    itemInsertTime = ">"; 
+                }
+
+                if (actualTextChars.length > 0) {
+                    gsap.set(actualTextChars, { opacity: 0 });
+                    store(tl.to(actualTextChars, {
+                        opacity: 1,
+                        duration: 0.01, 
+                        stagger: CHAR_TYPEWRITER_STAGGER,
+                        ease: "none"
+                    }, itemInsertTime));
+                }
+            });
+
+            return tl;
+        }
+
+
+        function cleanUpSlideAnimations(el) {
+            if (el.animationTweens) {
+                el.animationTweens.forEach(t => t.kill());
+                el.animationTweens = [];
+            }
+            gsap.killTweensOf(el.querySelectorAll('.emoji-char'));
+            delete el.dataset.titleAnimated; 
+            
+            const restore = (selector) => {
+                el.querySelectorAll(selector).forEach(e => {
+                    if (e.originalTextContent !== undefined) e.textContent = e.originalTextContent;
+                });
+            };
+
+            const T = el.querySelector("h1, h2");
+            if (T) { restore("h1, h2"); gsap.set(T, { opacity: 0 }); }
+
+            el.querySelectorAll("ul li").forEach(item => {
+                if (item.originalHTML) item.innerHTML = item.originalHTML;
+                gsap.set(item, { opacity: 1, visibility: 'visible' }); 
+            });
+            gsap.set(el.querySelectorAll("ul li span"), { opacity: 0 });
+            
+            delete el.dataset.partiallyAnimated;
+            gsap.set(el, { autoAlpha: 0 });
+        }
+
+        const slides = gsap.utils.toArray(".slide");
+        let currentSlideIndex = -1;
+
+        slides.forEach(slide => {
+            const title = slide.querySelector("h1, h2");
+            if (title) title.originalTextContent = title.textContent;
+
+            slide.querySelectorAll("ul li").forEach(el => el.originalHTML = el.innerHTML);
+            cleanUpSlideAnimations(slide);
+        });
+
+        function showSlide(idx, animationOptions = {}) {
+            const oldSlide = slides[currentSlideIndex];
+            const newSlide = slides[idx];
+            let oldSlideFadeOutDuration = 0.35;
+
+            if (oldSlide && oldSlide !== newSlide) {
+                gsap.to(oldSlide, {
+                    autoAlpha: 0, duration: oldSlideFadeOutDuration,
+                    onComplete: () => {
+                        oldSlide.classList.remove('active');
+                        cleanUpSlideAnimations(oldSlide);
+                    }
+                });
+            } else if (oldSlide === newSlide && oldSlide.dataset.partiallyAnimated === "true") {
+                if (oldSlide.animationTweens) { oldSlide.animationTweens.forEach(t => t.kill()); oldSlide.animationTweens = []; }
+                gsap.killTweensOf(oldSlide.querySelectorAll('.emoji-char')); 
+                oldSlideFadeOutDuration = 0; 
+            } else if (!oldSlide) { 
+                oldSlideFadeOutDuration = 0;
+            }
+
+            currentSlideIndex = idx;
+            gsap.delayedCall(oldSlideFadeOutDuration > 0 ? oldSlideFadeOutDuration : 0.01, () => {
+                if (!(newSlide.dataset.partiallyAnimated === "true" && animationOptions.startLiIndex > 0)) {
+                    const title = newSlide.querySelector("h1, h2");
+                    if (title && title.originalTextContent && !newSlide.dataset.titleAnimated) { 
+                         title.innerHTML = title.originalTextContent;
+                    }
+                }
+
+                newSlide.classList.add('active');
+                const fromLeft = (slides.indexOf(newSlide) % 2 === 0);
+                animateSlideIn(newSlide, fromLeft, animationOptions);
+            });
+        }
+        
+        const progressBarContainer = document.querySelector('.progress-bar-container');
+        const progressBarFill = document.querySelector('.progress-bar-fill');
+
+        function updateProgressBar() {
+            if (masterSlideTimeline && progressBarFill) {
+                const progress = masterSlideTimeline.progress();
+                gsap.set(progressBarFill, { width: progress * 100 + "%" });
+            }
+        }
+
+        const masterSlideTimeline = gsap.timeline({ 
+            paused: true, 
+            onStart: () => { 
+                if (progressBarContainer) {
+                    gsap.to(progressBarContainer, { opacity: 1 });
+                }
+            },
+            onUpdate: updateProgressBar, 
+            onComplete: () => {
+                console.log("Slide sequence finished.");
+                 if (progressBarFill) { 
+                    gsap.to(progressBarFill, { width: "100%", duration: 0.1 });
+                }
+                const circle = document.getElementById('animatedCircle');
+                gsap.to(circle, { opacity: 0, scale: 0, ease: 'power2.in' });
+                if (circlePulseTween) circlePulseTween.kill();
+                if (circleFloatTween) circleFloatTween.kill();
+            }
+        });
+
+        const appStartTimeline = gsap.timeline({
+            delay: 1.0,
+            onComplete: () => {
+                masterSlideTimeline.play();
+            }
+        });
+        
+        // --- BUILD THE SEQUENCE BASED ON AUDIO TRANSCRIPT (HIGH-PRECISION SYNC) ---
+
+        const moduleIntroTextElement = document.getElementById('moduleIntroText');
+        const introWords = splitTextIntoSpans(moduleIntroTextElement, 'words');
+        gsap.set(moduleIntroTextElement, {opacity: 1}); 
+        gsap.set(introWords, { opacity: 0, y: 20 });
+        masterSlideTimeline.to(introWords, {
+            opacity: 1, y: 0,
+            duration: 0.7, stagger: 0.06, ease: "back.out(1.7)"
+        }, 1.0);
+        masterSlideTimeline.to(introWords, {
+            opacity: 0,
+            duration: 0.5, stagger: { each: 0.04, from: "end" }
+        }, 5.5);
+        masterSlideTimeline.set(moduleIntroTextElement, { display: 'none' }, ">");
+
+        masterSlideTimeline
+            .add(() => showSlide(0, { liCountToAnimate: 0, animateTitleOverride: true }), 7.0)
+            
+            .add(() => {
+                const circle = document.getElementById('animatedCircle');
+                gsap.set(circle, {
+                    width: 120, height: 120, top: "58%", left: "50%",
+                    x: 0, y: 0, transform: "translate(-50%, -50%)"
+                });
+                if (circlePulseTween) circlePulseTween.kill();
+                if (circleFloatTween) circleFloatTween.kill();
+                circlePulseTween = gsap.to(circle, { scale: 0.95, ease: "sine.inOut", repeat: -1, yoyo: true, duration: 2.5 });
+                circleFloatTween = gsap.to(circle, { y: -10, ease: "sine.inOut", repeat: -1, yoyo: true, duration: 3 });
+                gsap.fromTo(circle, 
+                    { opacity: 0, scale: 0.8 }, 
+                    { opacity: 1, scale: 1, duration: 1.2, ease: "back.out(1.7)" }
+                );
+            }, 8.5)
+
+            // MODIFIED: Circle starts moving at 13.7s (0.3s before first bullet)
+            .add(() => {
+                const transitionDuration = 1.5;
+                const circle = document.getElementById('animatedCircle');
+                const progressBar = document.querySelector('.progress-bar-container');
+                const slideContainer = document.querySelector('.slide-container');
+
+                if (circleFloatTween) circleFloatTween.kill(); 
+
+                const containerRect = slideContainer.getBoundingClientRect();
+                const circleRect = circle.getBoundingClientRect();
+                
+                const startX = circleRect.left + circleRect.width / 2;
+                const startY = circleRect.top + circleRect.height / 2;
+
+                const finalSize = 40;
+                const finalRightPadding = 40;
+                const finalBottomPadding = 20;
+                
+                const endX = containerRect.right - finalRightPadding - (finalSize / 2);
+                const endY = containerRect.bottom - finalBottomPadding - (finalSize / 2) - 10;
+
+                const deltaX = endX - startX;
+                const deltaY = endY - startY;
+
+                gsap.to(circle, {
+                    duration: transitionDuration,
+                    width: finalSize, height: finalSize,
+                    x: deltaX, y: deltaY,
+                    ease: "power2.inOut"
+                });
+                gsap.to(progressBar, {
+                    duration: transitionDuration,
+                    left: "40px", width: "calc(100% - 130px)",
+                    transform: "translateX(0%)",
+                    ease: "power2.inOut"
+                });
+
+                circleFloatTween = gsap.to(circle, {
+                    y: `+=${-5}`, delay: transitionDuration,
+                    repeat: -1, yoyo: true,
+                    duration: 2.5, ease: "sine.inOut"
+                });
+            }, 13.7)
+            
+            // MODIFIED: First bullet point starts precisely at 14.0s
+            .add(() => showSlide(0, { startLiIndex: 0, liCountToAnimate: 1, animateTitleOverride: false, instantSetupLiEndIndex: -1 }), 14.0)
+            
+            .add(() => showSlide(0, { startLiIndex: 1, liCountToAnimate: 1, animateTitleOverride: false, instantSetupLiEndIndex: 0 }), 31.0)
+            
+            .add(() => showSlide(0, { startLiIndex: 2, liCountToAnimate: 1, animateTitleOverride: false, instantSetupLiEndIndex: 1 }), 55.0)
+            
+            .add(() => showSlide(0, { startLiIndex: 3, liCountToAnimate: 1, animateTitleOverride: false, instantSetupLiEndIndex: 2 }), 67.0)
+            
+            .add(() => {}, 92.0);
+
+    </script>
+</body>
+</html>
